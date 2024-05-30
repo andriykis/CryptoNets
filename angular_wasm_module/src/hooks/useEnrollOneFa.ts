@@ -46,7 +46,7 @@ export class EnrollOneFaService {
         this.enrollAntispoofStatusSubject.next('');
         this.enrollValidationStatusSubject.next('');
         this.enrollMessageSubject.next(result.returnValue.message);
-        // this.progressSubject.next(100);
+        this.progressSubject.next(100);
         this.enrollCount++;
         console.log('Enroll Count:', this.enrollCount);
       } else {
@@ -106,12 +106,19 @@ export class EnrollOneFaService {
   async enrollUserOneFa(token = '', skipAntispoof = false): Promise<void> {
     this.enrollTokenCurrent = token;
     this.skipAntispoofProcess = skipAntispoof;
+    if (token) {
+      if (this.progressSubject.value >= 100) return this.progressSubject.next(100);;
+      this.progressSubject.next(this.progressSubject.value + 20);
+    } else {
+      this.progressSubject.next(0);
+    }
     // disableButtons(true);
     try {
       const config = {
         input_image_format: 'rgba',
         mf_token: token,
-        skip_antispoof: skipAntispoof
+        skip_antispoof: skipAntispoof,
+        anti_spoofing_detect_document: false,
       };
       const bestImage = await enroll1FA(this.callback, config);
 
